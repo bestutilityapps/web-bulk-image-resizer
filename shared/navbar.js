@@ -11,6 +11,9 @@
   // Base URL for the production suite
   const HOSTNAME = 'https://bestutilityapps.com';
 
+  // Centralized Version Tag - Change this ONE value in /shared/navbar.js to instantly bust cache
+  const BUA_NAV_VERSION = '2026.11.08.4';
+
   // Automatically detect the folder location where navbar.js is hosted
   const ASSETS_BASE = (function () {
     const headerEl = document.getElementById('bua-header');
@@ -31,8 +34,40 @@
     return '/shared/';
   })();
 
-  // Official BUA Ribbon Squircle Brand Logo from brand-assets package
-  const BRAND_LOGO_SRC = `${ASSETS_BASE}brand-assets/square/bua-ribbon-square-squircle.png`;
+  // Official BUA Ribbon Squircle Brand Logo with version query
+  const BRAND_LOGO_SRC = `${ASSETS_BASE}brand-assets/square/bua-ribbon-square-squircle.png?v=${BUA_NAV_VERSION}`;
+
+  /**
+   * Auto-Inject and synchronize the shared stylesheet in <head>.
+   * Web apps do NOT need to include <link rel="stylesheet"> in their HTML!
+   * This guarantees all CSS updates are 100% controlled from /shared/.
+   */
+  function ensureStylesheet() {
+    const cssId = 'bua-navbar-css';
+    const cssUrl = `${ASSETS_BASE}navbar.css?v=${BUA_NAV_VERSION}`;
+    let linkEl = document.getElementById(cssId);
+
+    if (!linkEl) {
+      const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find(l => (l.href || '').includes('navbar.css'));
+      if (existing) {
+        existing.id = cssId;
+        linkEl = existing;
+      }
+    }
+
+    if (!linkEl) {
+      linkEl = document.createElement('link');
+      linkEl.id = cssId;
+      linkEl.rel = 'stylesheet';
+      linkEl.href = cssUrl;
+      document.head.appendChild(linkEl);
+    } else if (!linkEl.href.includes(`v=${BUA_NAV_VERSION}`)) {
+      linkEl.href = cssUrl;
+    }
+  }
+
+  // Immediately ensure stylesheet is injected
+  ensureStylesheet();
 
   // Tool categories and registry
   const TOOL_CATEGORIES = [
@@ -190,9 +225,19 @@
     }
 
     const current = normalizePath(window.location.pathname);
+    if (current === '/' || current === '' || current === '/index.html') {
+      return '/';
+    }
+    if (current.startsWith('/premium')) {
+      return '/premium/';
+    }
+    if (current.startsWith('/pricing')) {
+      return '/pricing/';
+    }
+
     for (const tool of ALL_TOOLS) {
       const toolNorm = normalizePath(tool.path);
-      if (current === toolNorm || current.startsWith(toolNorm)) {
+      if (current === toolNorm || current.startsWith(toolNorm) || (toolNorm === '/barcode/' && current.includes('barcode'))) {
         return toolNorm;
       }
     }
@@ -325,38 +370,59 @@
               </div>
             </a>
 
-            <!-- Center: Navigation & Mega Dropdown -->
+            <!-- Center: Navigation Links (Home, Free Tools, Premium Tools, Pricing) -->
             <nav class="bua-nav-center" aria-label="Main Navigation">
-              <div class="bua-nav-item" id="bua-dropdown-wrap">
-                <button type="button" class="bua-nav-link" id="bua-tools-trigger" aria-haspopup="true" aria-expanded="false">
-                  <span>All Tools</span>
-                  <span class="bua-dropdown-caret">${ICONS.caretDown}</span>
-                </button>
+              <ul class="bua-nav-list">
+                <!-- 1. Home -->
+                <li class="bua-nav-item">
+                  <a href="${HOSTNAME}/" class="bua-nav-link" id="bua-nav-home">Home</a>
+                </li>
 
-                <!-- Mega Dropdown Menu -->
-                <div class="bua-mega-dropdown" id="bua-tools-dropdown" role="menu" aria-label="All Tools Directory">
-                  <!-- Header with Instant Filter -->
-                  <div class="bua-dropdown-header">
-                    <div class="bua-search-box">
-                      <span class="bua-search-icon">${ICONS.search}</span>
-                      <input type="text" class="bua-search-input" id="bua-tool-search" placeholder="Quick search tools (e.g. barcode, pdf, css)..." autocomplete="off" spellcheck="false">
+                <!-- 2. Free Tools Dropdown -->
+                <li class="bua-nav-item" id="bua-dropdown-wrap">
+                  <button type="button" class="bua-nav-link" id="bua-tools-trigger" aria-haspopup="true" aria-expanded="false">
+                    <span>Free Tools</span>
+                    <span class="bua-dropdown-caret">${ICONS.caretDown}</span>
+                  </button>
+
+                  <!-- Mega Dropdown Menu -->
+                  <div class="bua-mega-dropdown" id="bua-tools-dropdown" role="menu" aria-label="Free Tools Directory">
+                    <!-- Header with Instant Filter -->
+                    <div class="bua-dropdown-header">
+                      <div class="bua-search-box">
+                        <span class="bua-search-icon">${ICONS.search}</span>
+                        <input type="text" class="bua-search-input" id="bua-tool-search" placeholder="Quick search free tools (e.g. barcode, pdf, css)..." autocomplete="off" spellcheck="false">
+                      </div>
+                      <div class="bua-dropdown-info">
+                        <span class="bua-privacy-pill">
+                          ${ICONS.shieldCheck} In-Browser Processing
+                        </span>
+                      </div>
                     </div>
-                    <div class="bua-dropdown-info">
-                      <span class="bua-privacy-pill">
-                        ${ICONS.shieldCheck} In-Browser Processing
-                      </span>
+
+                    <!-- Category Grid -->
+                    <div class="bua-mega-grid" id="bua-mega-grid">
+                      ${categoriesHTML}
+                      <div class="bua-no-results" id="bua-search-empty">
+                        No matching tools found. Try searching for "barcode", "converter", or "pdf".
+                      </div>
                     </div>
                   </div>
+                </li>
 
-                  <!-- Category Grid -->
-                  <div class="bua-mega-grid" id="bua-mega-grid">
-                    ${categoriesHTML}
-                    <div class="bua-no-results" id="bua-search-empty">
-                      No matching tools found. Try searching for "barcode", "converter", or "pdf".
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <!-- 3. Premium Tools -->
+                <li class="bua-nav-item">
+                  <a href="${HOSTNAME}/premium/" class="bua-nav-link" id="bua-nav-premium">
+                    <span>Premium Tools</span>
+                    <span class="bua-nav-badge-pro">PRO</span>
+                  </a>
+                </li>
+
+                <!-- 4. Pricing -->
+                <li class="bua-nav-item">
+                  <a href="${HOSTNAME}/pricing/" class="bua-nav-link" id="bua-nav-pricing">Pricing</a>
+                </li>
+              </ul>
             </nav>
 
             <!-- Right: Actions (Theme Toggle & Mobile Trigger) -->
@@ -393,9 +459,26 @@
           </div>
           
           <div class="bua-mobile-drawer-body">
+            <!-- Mobile Primary Links (Home, Premium Tools, Pricing) -->
+            <div class="bua-mobile-primary-links">
+              <a href="${HOSTNAME}/" class="bua-mobile-primary-link" id="bua-mob-home">
+                <span>Home</span>
+              </a>
+              <a href="${HOSTNAME}/premium/" class="bua-mobile-primary-link" id="bua-mob-premium">
+                <span>Premium Tools</span>
+                <span class="bua-nav-badge-pro">PRO</span>
+              </a>
+              <a href="${HOSTNAME}/pricing/" class="bua-mobile-primary-link" id="bua-mob-pricing">
+                <span>Pricing</span>
+              </a>
+            </div>
+
+            <div class="bua-mobile-divider"></div>
+
+            <div class="bua-mobile-section-title">Free Tools</div>
             <div class="bua-mobile-search">
               <span class="bua-search-icon">${ICONS.search}</span>
-              <input type="text" class="bua-search-input" id="bua-mobile-search-input" placeholder="Search tools..." autocomplete="off">
+              <input type="text" class="bua-search-input" id="bua-mobile-search-input" placeholder="Search free tools..." autocomplete="off">
             </div>
             <div id="bua-mobile-nav-list">
               ${mobileToolsHTML}
@@ -661,7 +744,7 @@
       mobileCloseBtn.addEventListener('click', closeMobileMenu);
     }
 
-    const mobileLinks = document.querySelectorAll('#bua-mobile-nav-list .bua-mobile-link');
+    const mobileLinks = document.querySelectorAll('#bua-mobile-drawer a');
     mobileLinks.forEach(link => {
       link.addEventListener('click', () => {
         closeMobileMenu();
@@ -717,6 +800,42 @@
   function setActiveTool(toolPathOrSlug) {
     const targetPath = normalizePath(toolPathOrSlug);
 
+    // 1. Top menu bar active states (Home, Free Tools, Premium Tools, Pricing)
+    const homeLink = document.getElementById('bua-nav-home');
+    const freeToolsBtn = document.getElementById('bua-tools-trigger');
+    const premiumLink = document.getElementById('bua-nav-premium');
+    const pricingLink = document.getElementById('bua-nav-pricing');
+
+    const mobHome = document.getElementById('bua-mob-home');
+    const mobPremium = document.getElementById('bua-mob-premium');
+    const mobPricing = document.getElementById('bua-mob-pricing');
+
+    // Reset top links
+    [homeLink, freeToolsBtn, premiumLink, pricingLink, mobHome, mobPremium, mobPricing].forEach(el => {
+      if (el) el.classList.remove('bua-active');
+    });
+
+    if (targetPath === '/' || targetPath === '' || targetPath === '/index.html') {
+      if (homeLink) homeLink.classList.add('bua-active');
+      if (mobHome) mobHome.classList.add('bua-active');
+    } else if (targetPath.startsWith('/premium')) {
+      if (premiumLink) premiumLink.classList.add('bua-active');
+      if (mobPremium) mobPremium.classList.add('bua-active');
+    } else if (targetPath.startsWith('/pricing')) {
+      if (pricingLink) pricingLink.classList.add('bua-active');
+      if (mobPricing) mobPricing.classList.add('bua-active');
+    } else {
+      // Check if it's one of the free tools
+      const isFreeTool = ALL_TOOLS.some(t => {
+        const p = normalizePath(t.path);
+        return p === targetPath || (targetPath && p.includes(targetPath));
+      });
+      if (isFreeTool && freeToolsBtn) {
+        freeToolsBtn.classList.add('bua-active');
+      }
+    }
+
+    // 2. Dropdown links
     const desktopLinks = document.querySelectorAll('#bua-tools-dropdown .bua-tool-link');
     desktopLinks.forEach(link => {
       const linkPath = normalizePath(link.getAttribute('data-path'));
@@ -737,6 +856,7 @@
       }
     });
 
+    // 3. Mobile drawer tool links
     const mobileLinks = document.querySelectorAll('#bua-mobile-nav-list .bua-mobile-link');
     mobileLinks.forEach(link => {
       const linkPath = normalizePath(link.getAttribute('data-path'));
@@ -748,6 +868,7 @@
       }
     });
 
+    // 4. Footer links
     const footerLinks = document.querySelectorAll('.bua-footer-link');
     footerLinks.forEach(link => {
       const href = normalizePath(link.getAttribute('href'));
@@ -763,6 +884,7 @@
    * Main Initialization
    */
   function init() {
+    ensureStylesheet();
     ThemeManager.init();
 
     const activePath = getActiveToolPath();
@@ -778,6 +900,7 @@
     }
 
     bindEvents();
+    setActiveTool(activePath);
   }
 
   // Public API attached to window for manual control & integration
