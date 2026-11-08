@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Online Bulk Image Resizer. Batch resize images by orientation (horizontal, vertical, square) to your exact target widths simultaneously with zero server uploads. 100% private and fast." />
+  <title>Bulk Image Resizer — Best Utility Apps</title>
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="assets/icon.png" />
+  <link rel="shortcut icon" href="assets/icon.ico" />
+
+  <!-- Shared Best Utility Apps Header & Footer Stylesheet -->
+  <link rel="stylesheet" href="/shared/navbar.css?v=2.0" onerror="this.onerror=null;this.href='shared/navbar.css';" />
+
+  <!-- Bulk Image Resizer SaaS Web Page Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Shared Header Container (Rendered by /shared/navbar.js) -->
+  <div id="bua-header" data-bua-active="/bulk-image-resizer/"></div>
+
+  <main class="bua-page-container">
+
+    <!-- Breadcrumb Navigation -->
+    <nav class="bua-breadcrumbs" aria-label="Breadcrumb">
+      <a href="https://bestutilityapps.com/">Home</a>
+      <span class="bua-bc-sep">/</span>
+      <a href="https://bestutilityapps.com/tools/">Tools</a>
+      <span class="bua-bc-sep">/</span>
+      <span class="bua-bc-current">Bulk Image Resizer</span>
+    </nav>
+
+    <!-- Hero Intro Section -->
+    <header class="bua-hero">
+      <h1>Bulk Image Resizer</h1>
+      <p class="bua-hero-subtitle">
+        Batch resize multiple images by orientation to your exact target widths simultaneously with zero quality loss — 100% private in your browser.
+      </p>
+    </header>
+
+    <!-- Centered Tool Card (.bua-tool-card) -->
+    <section class="bua-tool-card" id="tool-app" aria-label="Bulk Image Resizer Workspace">
+      <div class="tool-workspace">
+
+        <!-- Left / Controls Area -->
+        <aside class="tool-controls">
+          <div class="tool-controls-scroll">
+
+            <!-- Input Ingestion Box -->
+            <div class="form-group">
+              <label class="form-label">
+                <span>Source Images or Folder</span>
+                <span class="badge-subtle" id="queueCountBadge">0 files</span>
+              </label>
+
+              <!-- Hidden Native Inputs -->
+              <input type="file" id="fileInput" multiple accept="image/*,.jpg,.jpeg,.jfif,.png,.webp,.gif,.bmp,.avif,.tiff,.tif" style="display:none;" />
+              <input type="file" id="folderInput" webkitdirectory directory multiple style="display:none;" />
+
+              <!-- Upload Drag & Drop Zone -->
+              <div class="upload-dropzone" id="dropZone" title="Drop images or folders here, or click to browse">
+                <div class="dropzone-icon">
+                  <svg viewBox="0 0 24 24" class="icon-svg"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                </div>
+                <div class="dropzone-text">
+                  <span class="dropzone-primary">Drag &amp; drop photos or folders</span>
+                  <span class="dropzone-secondary">Supports JPG, PNG, WEBP, GIF, BMP, TIFF, AVIF</span>
+                </div>
+                <div class="dropzone-btn-row">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseFiles">
+                    <svg viewBox="0 0 24 24" class="btn-icon-sm"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+                    Choose Files
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseFolder">
+                    <svg viewBox="0 0 24 24" class="btn-icon-sm"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                    Choose Folder
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Output Format Segmented Control -->
+            <div class="form-group">
+              <label class="form-label" for="formatSeg">Output Format</label>
+              <div class="format-seg" id="formatSeg" role="radiogroup" aria-label="Output format">
+                <button type="button" class="format-btn active" data-format="original" role="radio" aria-checked="true">Original</button>
+                <button type="button" class="format-btn" data-format="jpg" role="radio" aria-checked="false">JPG</button>
+                <button type="button" class="format-btn" data-format="png" role="radio" aria-checked="false">PNG</button>
+                <button type="button" class="format-btn" data-format="webp" role="radio" aria-checked="false">WebP</button>
+              </div>
+
+              <!-- Quality Slider (shown for JPG / WebP) -->
+              <div id="qualityRow" class="quality-row" style="display:none;">
+                <div class="quality-header">
+                  <span class="quality-label">Compression Quality</span>
+                  <span id="qualityVal" class="quality-value">90%</span>
+                </div>
+                <input type="range" id="qualitySlider" min="1" max="100" value="90" class="form-range" />
+                <div class="quality-labels">
+                  <span>Smaller File Size</span>
+                  <span>Maximum Fidelity</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Orientation Width Presets -->
+            <div class="form-group">
+              <div class="orient-main-header">
+                <label class="form-label" style="margin-bottom:0;">Resize by Orientation</label>
+                <span class="orient-main-tip" title="Images are sorted dynamically by real aspect ratio. Set independent widths per group.">Adaptive Resizing ⓘ</span>
+              </div>
+
+              <!-- Horizontal Section -->
+              <div class="orient-card" id="orientCardHorizontal">
+                <div class="orient-card-header">
+                  <div class="orient-badge-title">
+                    <span class="orient-icon">↔</span>
+                    <span class="orient-name">Horizontal</span>
+                    <span class="orient-ratio-hint">(ratio &gt; 1.05)</span>
+                  </div>
+                  <span class="orient-count" id="countHorizontal">0 images</span>
+                </div>
+                <div class="orient-chips" id="chipsHorizontal"></div>
+                <div class="custom-width-wrap">
+                  <input type="number" id="customInputHorizontal" placeholder="+ custom px" min="10" max="16000" class="custom-width-input" />
+                  <button type="button" class="btn-chip-add" id="btnAddHorizontal" title="Add custom width">+</button>
+                </div>
+              </div>
+
+              <!-- Vertical Section -->
+              <div class="orient-card" id="orientCardVertical">
+                <div class="orient-card-header">
+                  <div class="orient-badge-title">
+                    <span class="orient-icon">↕</span>
+                    <span class="orient-name">Vertical</span>
+                    <span class="orient-ratio-hint">(ratio &lt; 0.95)</span>
+                  </div>
+                  <span class="orient-count" id="countVertical">0 images</span>
+                </div>
+                <div class="orient-chips" id="chipsVertical"></div>
+                <div class="custom-width-wrap">
+                  <input type="number" id="customInputVertical" placeholder="+ custom px" min="10" max="16000" class="custom-width-input" />
+                  <button type="button" class="btn-chip-add" id="btnAddVertical" title="Add custom width">+</button>
+                </div>
+              </div>
+
+              <!-- Square Section -->
+              <div class="orient-card" id="orientCardSquare">
+                <div class="orient-card-header">
+                  <div class="orient-badge-title">
+                    <span class="orient-icon">□</span>
+                    <span class="orient-name">Square</span>
+                    <span class="orient-ratio-hint">(0.95 ≤ ratio ≤ 1.05)</span>
+                  </div>
+                  <span class="orient-count" id="countSquare">0 images</span>
+                </div>
+                <div class="orient-chips" id="chipsSquare"></div>
+                <div class="custom-width-wrap">
+                  <input type="number" id="customInputSquare" placeholder="+ custom px" min="10" max="16000" class="custom-width-input" />
+                  <button type="button" class="btn-chip-add" id="btnAddSquare" title="Add custom width">+</button>
+                </div>
+              </div>
+
+              <div class="no-upscale-notice">
+                <svg viewBox="0 0 24 24" class="notice-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span><strong>No-Upscaling Protection Active:</strong> Target widths equal to or larger than your source image width are safely skipped to prevent quality distortion.</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Conversion Options & Renaming -->
+            <div class="form-group">
+              <label class="form-label">Batch Options</label>
+
+              <!-- Metadata & Folder Toggles -->
+              <div class="toggle-cards-grid">
+                <label class="toggle-card">
+                  <div class="toggle-content">
+                    <span class="toggle-title">Strip Metadata</span>
+                    <span class="toggle-desc">Remove GPS, camera EXIF, and timestamps for smaller file sizes &amp; privacy</span>
+                  </div>
+                  <input type="checkbox" id="toggleStripMeta" checked class="toggle-switch" />
+                </label>
+
+                <label class="toggle-card">
+                  <div class="toggle-content">
+                    <span class="toggle-title">Preserve Folder Hierarchy</span>
+                    <span class="toggle-desc">Mirror uploaded subdirectory structure inside downloaded ZIP archive</span>
+                  </div>
+                  <input type="checkbox" id="togglePreserveFolders" checked class="toggle-switch" />
+                </label>
+
+                <label class="toggle-card">
+                  <div class="toggle-content">
+                    <span class="toggle-title">Include Original Files in ZIP</span>
+                    <span class="toggle-desc">Bundle original images into an <code>originals_backup/</code> folder inside the ZIP</span>
+                  </div>
+                  <input type="checkbox" id="toggleIncludeOriginals" class="toggle-switch" />
+                </label>
+              </div>
+
+              <!-- Token Renaming -->
+              <div class="rename-box">
+                <span class="rename-title">Custom Renaming Pattern <span class="badge-optional">(optional)</span></span>
+                <div class="rename-inputs">
+                  <input type="text" id="renamePrefix" placeholder="prefix (e.g. web)" maxlength="28" class="form-input rename-field" />
+                  <span class="rename-sep">-</span>
+                  <span class="rename-fixed">[filename]</span>
+                  <span class="rename-sep">-</span>
+                  <input type="text" id="renameSuffix" placeholder="suffix (e.g. thumb)" maxlength="28" class="form-input rename-field" />
+                  <span class="rename-sep">-</span>
+                  <span class="rename-fixed">[width]w</span>
+                </div>
+                <div class="rename-preview-label">
+                  <span>Preview:</span>
+                  <code id="renamePreview">sample-photo-1920w.jpg</code>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Controls Sticky Footer Action -->
+          <div class="tool-controls-footer">
+            <button type="button" class="btn btn-primary btn-lg" id="btnResize" disabled>
+              <svg viewBox="0 0 24 24" class="btn-icon"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg>
+              <span id="btnResizeText">Resize Images</span>
+            </button>
+            <button type="button" class="btn btn-danger btn-cancel" id="btnCancel" style="display:none;">
+              ✕ Cancel Batch
+            </button>
+          </div>
+        </aside>
+
+        <!-- Right / Preview & Queue Area -->
+        <main class="tool-preview-area">
+
+          <!-- Topbar with Live Status, Navigation Tabs, and Quick Actions -->
+          <div class="preview-topbar">
+            <div class="preview-tabs">
+              <button type="button" class="preview-tab active" id="tabBtnFiles">
+                <svg viewBox="0 0 24 24" class="tab-icon"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+                Files &amp; Queue
+                <span class="tab-pill" id="tabPillFiles">0</span>
+              </button>
+              <button type="button" class="preview-tab" id="tabBtnSummary">
+                <svg viewBox="0 0 24 24" class="tab-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                Summary &amp; Results
+              </button>
+            </div>
+
+            <div class="preview-topbar-actions">
+              <button type="button" class="btn-link-action" id="btnClearAll" disabled>
+                <svg viewBox="0 0 24 24" class="action-icon-sm"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          <!-- Stats Dashboard Pills Bar -->
+          <div class="stats-pills-bar">
+            <div class="stat-pill">
+              <span class="stat-pill-label">Total Images</span>
+              <span class="stat-pill-val" id="statTotal">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Resized</span>
+              <span class="stat-pill-val stat-success" id="statResized">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Output Files</span>
+              <span class="stat-pill-val stat-accent" id="statCreated">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Skipped</span>
+              <span class="stat-pill-val stat-warning" id="statSkipped">0</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-label">Space Saved</span>
+              <span class="stat-pill-val stat-success" id="statSaved">0 KB</span>
+            </div>
+          </div>
+
+          <!-- Live Progress Container (Visible during active resizing) -->
+          <div class="progress-container" id="progressWrap" style="display:none;">
+            <div class="progress-meta">
+              <span class="progress-status" id="progressStatus">Resizing images in browser...</span>
+              <span class="progress-count" id="progressCount">0 / 0 (0%)</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- Panel 1: Files & Queue Tab -->
+          <div class="preview-content-panel active" id="panelFiles">
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyQueueState">
+              <div class="empty-state-graphic">
+                <svg viewBox="0 0 24 24" class="empty-icon"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+              </div>
+              <h3 class="empty-state-title">No Images Selected</h3>
+              <p class="empty-state-desc">Drag and drop photos or folders into this workspace, or use the buttons on the left.</p>
+              <div class="empty-state-buttons">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">
+                  Select Images
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('folderInput').click()">
+                  Select Folder
+                </button>
+              </div>
+            </div>
+
+            <!-- Populated File List Container -->
+            <div class="file-queue-list" id="fileQueueList" style="display:none;"></div>
+          </div>
+
+          <!-- Panel 2: Summary & Results Tab -->
+          <div class="preview-content-panel" id="panelSummary" style="display:none;">
+
+            <!-- Empty Summary State -->
+            <div class="empty-state" id="emptySummaryState">
+              <div class="empty-state-graphic">
+                <svg viewBox="0 0 24 24" class="empty-icon"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+              </div>
+              <h3 class="empty-state-title">No Batch Run Yet</h3>
+              <p class="empty-state-desc">Configure your target widths on the left and click "Resize Images" to view comprehensive metrics.</p>
+            </div>
+
+            <!-- Populated Summary Content -->
+            <div class="summary-dashboard" id="summaryDashboard" style="display:none;">
+
+              <div class="summary-metrics-grid">
+                <div class="metric-card">
+                  <div class="metric-title">Images Ingested</div>
+                  <div class="metric-value" id="summaryTotalImages">0</div>
+                  <div class="metric-sub" id="summaryOrientationBreakdown">0 horizontal · 0 vertical · 0 square</div>
+                </div>
+
+                <div class="metric-card">
+                  <div class="metric-title">Output Files Created</div>
+                  <div class="metric-value metric-accent" id="summaryFilesCreated">0</div>
+                  <div class="metric-sub" id="summaryAvgPerFile">Avg 0 sizes generated per image</div>
+                </div>
+
+                <div class="metric-card">
+                  <div class="metric-title">Total Net Space Saved</div>
+                  <div class="metric-value metric-success" id="summarySpaceSaved">0 MB</div>
+                  <div class="metric-sub" id="summaryCompressionRatio">0% average size reduction</div>
+                </div>
+              </div>
+
+              <!-- Visual Orientation Breakdown Chart -->
+              <div class="breakdown-chart-card">
+                <h4 class="chart-title">Processing &amp; Orientation Breakdown</h4>
+                <div class="chart-stacked-bar" id="chartStackedBar">
+                  <div class="chart-segment seg-horizontal" id="chartSegHorizontal" style="width:0%;" title="Horizontal images"></div>
+                  <div class="chart-segment seg-vertical" id="chartSegVertical" style="width:0%;" title="Vertical images"></div>
+                  <div class="chart-segment seg-square" id="chartSegSquare" style="width:0%;" title="Square images"></div>
+                  <div class="chart-segment seg-skipped" id="chartSegSkipped" style="width:0%;" title="Skipped images"></div>
+                </div>
+                <div class="chart-legend">
+                  <span class="legend-item"><span class="legend-dot dot-horizontal"></span> Horizontal (<span id="legendCountH">0</span>)</span>
+                  <span class="legend-item"><span class="legend-dot dot-vertical"></span> Vertical (<span id="legendCountV">0</span>)</span>
+                  <span class="legend-item"><span class="legend-dot dot-square"></span> Square (<span id="legendCountS">0</span>)</span>
+                  <span class="legend-item"><span class="legend-dot dot-skipped"></span> Skipped / Unchanged (<span id="legendCountSkip">0</span>)</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Bottom Action Bar (Primary Download Actions) -->
+          <div class="tool-preview-bottom-bar">
+            <div class="bottom-bar-status">
+              <span class="status-indicator-dot" id="globalStatusDot"></span>
+              <span id="globalStatusText">Ready for images</span>
+            </div>
+            <div class="bottom-bar-actions">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnExportCSV" disabled>
+                <svg viewBox="0 0 24 24" class="btn-icon-sm"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                Export CSV Report
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" id="btnDownloadZip" disabled>
+                <svg viewBox="0 0 24 24" class="btn-icon-sm"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                Download All (ZIP)
+              </button>
+            </div>
+          </div>
+
+        </main>
+
+      </div>
+    </section>
+
+    <!-- "How It Works" Section (3-Step Guide) -->
+    <section class="bua-section bua-how-it-works">
+      <div class="bua-section-header">
+        <span class="bua-section-tag">Quick Guide</span>
+        <h2 class="bua-section-title">How It Works</h2>
+        <p class="bua-section-desc">Resize hundreds of photos in three effortless, automated steps.</p>
+      </div>
+
+      <div class="bua-steps-grid">
+        <div class="bua-step-card">
+          <div class="bua-step-number">1</div>
+          <h3 class="bua-step-title">Select Format / Upload File</h3>
+          <p class="bua-step-desc">
+            Drag and drop individual image files or select an entire directory. The tool automatically analyzes each image and categorizes it into Horizontal, Vertical, or Square based on its true aspect ratio.
+          </p>
+        </div>
+
+        <div class="bua-step-card">
+          <div class="bua-step-number">2</div>
+          <h3 class="bua-step-title">Configure &amp; Customize</h3>
+          <p class="bua-step-desc">
+            Toggle preset target widths or add custom pixel sizes for each orientation. Pick your output format (Original, JPG, PNG, or WebP), customize compression fidelity, and set naming prefixes or suffixes.
+          </p>
+        </div>
+
+        <div class="bua-step-card">
+          <div class="bua-step-number">3</div>
+          <h3 class="bua-step-title">Instant Download &amp; Use</h3>
+          <p class="bua-step-desc">
+            Click Resize Images to process everything client-side in seconds. Download files one by one or click "Download All (ZIP)" to receive every generated size organized with your folder structure intact.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features Grid (4 Cards) -->
+    <section class="bua-section bua-features">
+      <div class="bua-section-header">
+        <span class="bua-section-tag">Engineered for Creators</span>
+        <h2 class="bua-section-title">Key Features</h2>
+        <p class="bua-section-desc">Designed for photographers, e-commerce managers, marketing teams, and developers.</p>
+      </div>
+
+      <div class="bua-features-grid">
+        <!-- Feature 1 -->
+        <div class="bua-feature-card">
+          <div class="bua-feature-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+          </div>
+          <div class="bua-feature-content">
+            <h3>100% In-Browser Privacy</h3>
+            <p>Your photos, product listings, and confidential media never leave your device. All classification and resizing happens locally inside your browser with zero remote server uploads.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bua-feature-card">
+          <div class="bua-feature-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H7.5V7H9c.83 0 1.5.67 1.5 1.5v2zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H14c.83 0 1.5.67 1.5 1.5v4zm4-3H18v1h1.5V12H18v2h-1.5V7H21v2.5z"/></svg>
+          </div>
+          <div class="bua-feature-content">
+            <h3>Multi-Format Export</h3>
+            <p>Keep your original file formats or convert batches in one click to modern WebP for ultra-light websites, high-compression JPG for social media, or crisp lossless PNG.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bua-feature-card">
+          <div class="bua-feature-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+          </div>
+          <div class="bua-feature-content">
+            <h3>High-Resolution Lossless Quality</h3>
+            <p>High-quality multi-step downscaling preserves sharp edges and vibrant tones. Strict no-upscaling protection guarantees smaller images are never artificially enlarged or pixelated.</p>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="bua-feature-card">
+          <div class="bua-feature-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 8h-3v3h-2v-3h-3v-2h3V9h2v3h3v2z"/></svg>
+          </div>
+          <div class="bua-feature-content">
+            <h3>Commercial Use Readiness</h3>
+            <p>Zero watermarks, lossy artifacts, or artificial restrictions. Package multiple responsive thumbnail sizes for entire e-commerce catalogs and export audit CSV logs with one click.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Frequently Asked Questions (FAQ) Accordion -->
+    <section class="bua-section bua-faq">
+      <div class="bua-section-header">
+        <span class="bua-section-tag">Got Questions?</span>
+        <h2 class="bua-section-title">Frequently Asked Questions</h2>
+        <p class="bua-section-desc">Everything you need to know about batch resizing images in your browser.</p>
+      </div>
+
+      <div class="bua-faq-list">
+        <!-- FAQ 1 -->
+        <details class="bua-faq-item" open>
+          <summary class="bua-faq-summary">
+            <span>Why does Bulk Image Resizer sort images by orientation?</span>
+            <svg class="bua-faq-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </summary>
+          <div class="bua-faq-content">
+            <p>Traditional batch resizers force a uniform width or height across every file, which breaks portrait photos or requires you to manually separate landscape and portrait shots beforehand. Bulk Image Resizer automatically identifies whether each photo is <strong>Horizontal</strong>, <strong>Vertical</strong>, or <strong>Square</strong>, and applies tailored target widths to each orientation in a single automatic pass while preserving original aspect ratios.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 2 -->
+        <details class="bua-faq-item">
+          <summary class="bua-faq-summary">
+            <span>Are my photos uploaded to any server or cloud storage?</span>
+            <svg class="bua-faq-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </summary>
+          <div class="bua-faq-content">
+            <p><strong>No, never.</strong> This tool runs 100% locally within your web browser using HTML5 Canvas and Web APIs. Your images, filenames, and folder structures are processed directly on your computer's CPU/GPU and are never sent over the internet or stored on our servers.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 3 -->
+        <details class="bua-faq-item">
+          <summary class="bua-faq-summary">
+            <span>Will smaller images be stretched or enlarged?</span>
+            <svg class="bua-faq-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </summary>
+          <div class="bua-faq-content">
+            <p>No. The engine includes strict <strong>No-Upscaling Protection</strong>. If a target width is greater than or equal to the image's original width, that specific size is safely bypassed so your images are never artificially stretched, blurred, or interpolated.</p>
+          </div>
+        </details>
+
+        <!-- FAQ 4 -->
+        <details class="bua-faq-item">
+          <summary class="bua-faq-summary">
+            <span>How do I download all resized images at once?</span>
+            <svg class="bua-faq-arrow" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+          </summary>
+          <div class="bua-faq-content">
+            <p>Once batch resizing completes, click the <strong>Download All (ZIP)</strong> button. The browser will package all generated sizes into a single clean ZIP archive. If you uploaded a folder with subdirectories, you can enable "Preserve Folder Hierarchy" to keep your directory tree intact inside the archive.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Image Preview & Zoom Modal -->
+  <div class="modal-overlay" id="previewModal" style="display:none;" onclick="closePreviewModal(event)">
+    <div class="modal modal-preview-box">
+      <div class="modal-head">
+        <div class="modal-title-group">
+          <h3 class="modal-title" id="previewModalTitle">Image Preview</h3>
+          <span class="modal-subtitle" id="previewModalMeta"></span>
+        </div>
+        <button type="button" class="modal-close" onclick="closePreviewModalDirect()" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body modal-preview-body">
+        <div class="preview-stage">
+          <img id="previewModalImg" src="" alt="Enlarged preview" class="modal-preview-img" />
+        </div>
+        <div class="preview-modal-sizes" id="previewModalSizes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Pill -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Shared Footer Container (Rendered by /shared/navbar.js) -->
+  <div id="bua-footer"></div>
+
+  <!-- Bundled Client-Side Vendor Libraries -->
+  <script src="js/vendor/jszip.min.js"></script>
+
+  <!-- Shared Best Utility Apps Header & Footer Logic with local fallback -->
+  <script src="/shared/navbar.js?v=2.0" onerror="this.onerror=null;var s=document.createElement('script');s.src='shared/navbar.js';this.parentNode.insertBefore(s,this.nextSibling);"></script>
+
+  <!-- Bulk Image Resizer Web Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
